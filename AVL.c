@@ -31,34 +31,33 @@ int abs(int);
 int max(int, int);
 int getSafe(node *);
 int main() {
-	int t; scanf("%d", &t);
-	while (t--) {
-		bbst *s = createBbst();
-		int q; scanf("%d", &q);
-		while (q--) {
-			char op; scanf("\n%c", &op);
-			if (op == 'I') {
-				int x; scanf("%d", &x);
-				insertBbst(s, x);
-			} else {
-				int mode, x; scanf("%d", &mode);
-				if (s->root == NULL) continue;
-				if (mode == -1) x = beginBbst(s)->x;
-				else x = endBbst(s)->x;
-				deleteBbst(s, x);
-			}
-		}
-		if (s->root == NULL) printf("EMPTY\n");
-		else printf("%d %d\n", endBbst(s)->x, beginBbst(s)->x);
-		destroyBbst(s);
-	}
+    bbst *tree = createBbst();
+	while (1) {
+        char op; scanf("%c", &op);
+        if (op == 'i') {
+            int k; scanf(" %d", &k);
+            insertBbst(tree, k);
+        } else if (op == 'd') {
+            int k; scanf(" %d", &k);
+            if (findBbst(tree, k)) {deleteBbst(tree, k); printf("%d\n", k);}
+            else printf("X\n");
+        } else if (op == 's') {
+            int k; scanf(" %d", &k);
+            if (findBbst(tree, k)) printf("%d\n", k);
+            else printf("X\n");
+        } else if (op == 'p') {
+            preorder(tree->root);
+            printf("\n");
+        } else return 0;
+        scanf("\n");
+    }
 	return 0;
 }
 void preorder(node *root) {
 	if (root == NULL) return;
-    preorder(root->right);
-    printf("%d ", root->x);
+	printf(" %d", root->x);
     preorder(root->left);
+    preorder(root->right);
 }
 bbst *createBbst() {
 	bbst *s = (bbst *)malloc(sizeof(bbst));
@@ -111,7 +110,7 @@ int _findBbst(node *root, _BBST_DATA_TYPE_ x) {
 	if (root == NULL) return 0;
 	if (compare(x, root->x)) return _findBbst(root->left, x);
 	else if (compare(root->x, x)) return _findBbst(root->right, x);
-	else return 1;
+	else return root->cnt;
 }
 node *_insertBbst(node *root, _BBST_DATA_TYPE_ x) {
 	if (root == NULL) {
@@ -158,17 +157,18 @@ node *rightRotate(node *z) {
 	return y;
 }
 node *beginBbst(bbst *s) {
-	node *root = s->root;
 	return _beginBbst(s->root);
 }
 node *endBbst(bbst *s) {
 	return _endBbst(s->root);
 }
 node *_beginBbst(node *root) {
+    if (root == NULL) return root;
 	while (root->left) root = root->left;
 	return root;
 }
 node *_endBbst(node *root) {
+    if (root == NULL) return root;
 	while (root->right) root = root->right;
 	return root;
 }
