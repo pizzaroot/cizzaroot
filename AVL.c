@@ -10,6 +10,7 @@ typedef struct {
 	node *root;
 } bbst;
 void preorder(node *);
+void inorder(node *);
 bbst *createBbst();
 void destroyBbst(bbst *);
 void _destroyBbst(node *);
@@ -19,7 +20,8 @@ void deleteBbst(bbst *, _BBST_DATA_TYPE_);
 node *_deleteBbst(node *, _BBST_DATA_TYPE_);
 int findBbst(bbst *, _BBST_DATA_TYPE_);
 int _findBbst(node *, _BBST_DATA_TYPE_);
-node *balanceBbst(node *);
+node *fixBbst(node *);
+node *balanceBbst(node *, _BBST_DATA_TYPE_);
 node *leftRotate(node *);
 node *rightRotate(node *);
 node *beginBbst(bbst *);
@@ -31,26 +33,9 @@ int abs(int);
 int max(int, int);
 int getSafe(node *);
 int main() {
-    bbst *tree = createBbst();
-	while (1) {
-        char op; scanf("%c", &op);
-        if (op == 'i') {
-            int k; scanf(" %d", &k);
-            insertBbst(tree, k);
-        } else if (op == 'd') {
-            int k; scanf(" %d", &k);
-            if (findBbst(tree, k)) {deleteBbst(tree, k); printf("%d\n", k);}
-            else printf("X\n");
-        } else if (op == 's') {
-            int k; scanf(" %d", &k);
-            if (findBbst(tree, k)) printf("%d\n", k);
-            else printf("X\n");
-        } else if (op == 'p') {
-            preorder(tree->root);
-            printf("\n");
-        } else return 0;
-        scanf("\n");
-    }
+    bbst *s = createBbst();
+    
+    destroyBbst(s);
 	return 0;
 }
 void preorder(node *root) {
@@ -58,6 +43,12 @@ void preorder(node *root) {
 	printf(" %d", root->x);
     preorder(root->left);
     preorder(root->right);
+}
+void inorder(node *root) {
+	if (root == NULL) return;
+    inorder(root->left);
+	printf(" %d", root->x);
+    inorder(root->right);
 }
 bbst *createBbst() {
 	bbst *s = (bbst *)malloc(sizeof(bbst));
@@ -97,7 +88,7 @@ node *_deleteBbst(node *root, _BBST_DATA_TYPE_ x) {
 	}
 	if (root == NULL) return root;
 	root->height = 1 + max(getSafe(root->left), getSafe(root->right));
-	root = balanceBbst(root);
+	root = fixBbst(root);
 	return root;
 }
 void insertBbst(bbst *s, _BBST_DATA_TYPE_ x) {
@@ -127,18 +118,30 @@ node *_insertBbst(node *root, _BBST_DATA_TYPE_ x) {
 	else if (compare(root->x, x)) root->right = _insertBbst(root->right, x);
 	else {root->cnt++; return root;}
 	root->height = 1 + max(getSafe(root->left), getSafe(root->right));
-	root = balanceBbst(root);
+	root = balanceBbst(root, x);
 	return root;
 }
-node *balanceBbst(node *root) {
+node *fixBbst(node *root) {
 	int f = getSafe(root->left) - getSafe(root->right);
 	if (abs(f) <= 1) return root;
 	if (f > 1) {
-		if (getSafe(root->left->left) <= getSafe(root->left->right)) root->left = leftRotate(root->left);
+		if (getSafe(root->left->left) < getSafe(root->left->right)) root->left = leftRotate(root->left);
 		return rightRotate(root);
 	}
 	if (f < -1) {
-		if (getSafe(root->right->right) <= getSafe(root->right->left)) root->right = rightRotate(root->right);
+		if (getSafe(root->right->right) < getSafe(root->right->left)) root->right = rightRotate(root->right);
+		return leftRotate(root);
+	}
+}
+node *balanceBbst(node *root, _BBST_DATA_TYPE_ x) {
+	int f = getSafe(root->left) - getSafe(root->right);
+	if (abs(f) <= 1) return root;
+	if (f > 1) {
+		if (compare(root->left->x, x)) root->left = leftRotate(root->left);
+		return rightRotate(root);
+	}
+	if (f < -1) {
+		if (compare(x, root->right->x)) root->right = rightRotate(root->right);
 		return leftRotate(root);
 	}
 }
